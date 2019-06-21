@@ -49,6 +49,6 @@ func EstablishConnection() {
 
 // StoreInfo ...
 func StoreInfo(bytes []byte, city_name string) {
-	qryString := "INSERT INTO data.info (payload, city_name, timestamp) VALUES (?, ?, ?)"
+	qryString := "INSERT INTO data.info (payload, city_name, timestamp) VALUES (?, ?, ?) USING TTL 21600;"
 	CassandraSession.Query(qryString, string(bytes), city_name, time.Now()).Exec()
 }
