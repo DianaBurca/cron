@@ -1,0 +1,46 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: cron
+  namespace: applications
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 80
+    targetPort: 8080
+  selector:
+    app: cron
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cron
+  namespace: applications
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: cron
+  template:
+    metadata:
+      labels:
+        app: cron
+    spec:
+      containers:
+      - env:
+          - name: host 
+            valueFrom: 
+              configMapKeyRef: 
+                key: host
+                name: cassandra-configmap
+          - name: pass 
+            valueFrom: 
+              configMapKeyRef: 
+                key: pass
+                name: cassandra-configmap
+        name: cron
+        image: diana1996/cron:latest
+        ports:
+        - containerPort: 8080
+        
