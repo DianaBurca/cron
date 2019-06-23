@@ -2,6 +2,7 @@ package utils
 
 import (
 	"fmt"
+	"net/http"
 	"os"
 	"time"
 
@@ -51,4 +52,20 @@ func EstablishConnection() {
 func StoreInfo(bytes []byte, city_name string) {
 	qryString := "INSERT INTO data.info (payload, city_name, timestamp) VALUES (?, ?, ?) USING TTL 21600;"
 	CassandraSession.Query(qryString, string(bytes), city_name, time.Now()).Exec()
+}
+func findOrCreate(cityName string) int {
+	existQryString := "select count(id) as exists from cron_mt where city_name=?"
+	result := map[string]interface{}{}
+	CassandraSession.Query(existQryString, cityName).MapScan(result)
+	if result["exists"].(int64) == 0 {
+		insertQryString := "INSERT INTO data.cron_mt (city_name, id) VALUES (?,?)"
+		err := CassandraSession.Query(insertQryString, cityName, gocql.TimeUUID()).Exec()
+		if err != nil {
+			fmt.Printf("FindOrCreate: %v\n", err)
+			return http.StatusUnprocessableEntity
+		}
+		return http.StatusCreated
+	} else {
+		return http.StatusOK
+	}
 }

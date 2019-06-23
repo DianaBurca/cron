@@ -43,11 +43,11 @@ func main() {
 
 	driver := gin.Default()
 
-	driver.PUT("/store/:name", utils.StoreHandler)
+	driver.PUT("/store", utils.StoreHandler)
 	driver.GET("/.well-known/live", utils.Health)
 	driver.GET("/.well-known/ready", utils.Health)
 
-	driver.Run("localhost:9090")
+	driver.Run()
 }
 
 func infoLoader() {
